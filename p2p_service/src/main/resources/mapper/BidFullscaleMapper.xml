@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bw.mapper.BidFullscaleMapper">
+
+    <!-- 满标列表 -->
+    <select id="fullscaleList" resultType="LoanMark">
+        select * from t_loan_mark where status=2
+    </select>
+
+    <!--满标审核不予通过 -->
+    <insert id="checkFail" parameterType="BorrowAuditRecord">
+        insert into t_borrow_audit_record set borrow_id=#{borrowSignId},audit_type=1,audit_status=4,audit_comment=#{comment},audit_user_id=#{checkid},audit_time=#{checkDate}
+    </insert>
+
+    <!-- 向满标审核表t_borrow_audit_record插入审核记录 -->
+    <insert id="insertScaleRecord" parameterType="BorrowAuditRecord">
+        insert into t_borrow_audit_record set borrow_id=#{borrowSignId},audit_type=1,audit_status=1,audit_comment=#{comment},audit_user_id=#{checkid},audit_time=#{checkDate}
+    </insert>
+
+    <!-- 修改借款标t_loan_mark中的状态为还款中 -->
+    <update id="updateStstus" parameterType="LoanMark">
+        update t_loan_mark set status=3 where borrow_sign_id=#{borrowSignId}
+    </update>
+
+    <!-- 获取申请人的账户信息 -->
+    <select id="getBorrowLoanMark" resultType="LoanMark">
+        select * from t_loan_mark where borrow_sign_id=#{borrowSignId}
+    </select>
+
+    <!-- 借款人的账户 -->
+    <select id="getBorrowAccount" resultType="Account">
+        select * from t_account where id=#{borrowUsersId}
+    </select>
+
+    <!-- 借款人的可用余额增加 -->
+    <update id="updateBorrowUserAV" parameterType="Account">
+        update t_account set accoubt_avbalance=#{newAV},unreceive_money=#{newIntamont} where id=#{borrowUserid}
+    </update>
+
+    <!-- 根据借款标的id查询 所有投该标的信息 -->
+    <select id="getBidRecordListById" resultType="BidRecord">
+        select * from t_bid_record where borrow_id=#{borrowSignId}
+    </select>
+
+    <!-- 循环 修改出借人的账户 -->
+    <update id="updateBidUserUP" parameterType="Account">
+        update t_account set unreceive_principal=#{bidMoney},unreceive_interest=#{bidUserUI},accoubt_frobalance=#{BidUserAF} where id=#{bidUserId}
+    </update>
+
+    <!-- 查询出借人的账户 -->
+    <select id="getBidUserAccountById" resultType="Account">
+        select * from t_account where id=#{bidUserId}
+    </select>
+
+    <!-- 借款人收到借款 可用余额增加 顺便添加一天动账记录 -->
+    <insert id="insertAccountFlow" parameterType="AccountFlow">
+        insert into t_account_flow set record_date=#{recordDate},record_handletype=0,record_handlemoney=#{accountFlowMoney},account_id=#{borrowUserid},record_surplus=#{newAV}
+    </insert>
+
+    <!-- 循环添加 出借人的动账记录 -->
+    <insert id="BidUserAccountFlow" parameterType="AccountFlow">
+        insert into t_account_flow set record_date=#{bidRecordDate},record_handletype=0,record_handlemoney=#{bidMoney},account_id=#{bidUserId},record_surplus=#{bidUserAF}
+    </insert>
+
+    <!-- 添加还款计划 -->
+    <insert id="insertReturnPlan" parameterType="ReturnPlan">
+        insert into t_return_plan set borrow_id=#{borrowId},loan_name=#{borrowName},phase=#{returnMonthe},return_user_id=#{borrowUserId},return_money=#{returnMoney},return_principal=#{returnPrincipal},return_interest=#{interestAmont},return_deadline=#{returnDate},return_status=0
+    </insert>
+
+    <!-- 获取这一期的还款计划 -->
+    <select id="getReturnPlan" resultType="ReturnPlan">
+        select * from t_return_plan where phase=#{returnMonthe}
+    </select>
+
+    <!-- 添加回款计划  Integer returnPlanid, Integer borrowId, String borrowName, Integer returnMonthe, BigDecimal receiveMoney, BigDecimal receivePal, BigDecimal interestFee, -->
+    <insert id="insertRecordPlan" parameterType="ReceivePlan">
+        insert into receive_plan set return_id=#{returnPlanid},borrow_id=#{borrowId},loan_name=#{borrowName},phase=#{returnMonthe},receive_money=#{receiveMoney},receive_interest=6,receive_principal=#{receivePal},interest_fee=#{interestFee},receive_user_id=#{borrowUserId},receive_date=#{receiveDate},receive_status=0
+    </insert>
+
+</mapper>

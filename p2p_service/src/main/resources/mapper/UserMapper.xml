@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bw.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.bw.entity.Account" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="accoubt_avbalance" property="accoubtAvbalance" jdbcType="DECIMAL" />
+        <result column="accoubt_frobalance" property="accoubtFrobalance" jdbcType="DECIMAL" />
+        <result column="unreceive_principal" property="unreceivePrincipal" jdbcType="DECIMAL" />
+        <result column="unreceive_interest" property="unreceiveInterest" jdbcType="DECIMAL" />
+        <result column="unreceive_money" property="unreceiveMoney" jdbcType="DECIMAL" />
+        <result column="credit_limit" property="creditLimit" jdbcType="DECIMAL" />
+        <result column="remain_credit_limit" property="remainCreditLimit" jdbcType="DECIMAL" />
+        <result column="trade_password" property="tradePassword" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <!--登录验证-->
+    <select id="login" resultType="User">
+        select * from t_user where user_username =#{username}
+    </select>
+
+    <!--用户个人资料-->
+    <select id="selUserByName" resultType="User">
+        select * from t_user where user_username=#{username}
+    </select>
+
+    <!--注册-->
+    <insert id="insertUser" parameterType="User">
+        insert into t_user set user_username=#{userUsername},user_password=#{userPassword},user_phone=#{userPhone},user_microblog=#{userMicroblog},user_presenter=#{userPresenter},user_vip=#{userVip},user_status=#{userStatus},user_email=#{userEmail},user_reg_time=#{userRegtime},user_address=#{userAddress}
+    </insert>
+
+    <insert id="insertAccount" parameterType="Account">
+        insert into t_account set id=#{id}
+    </insert>
+
+    <!--查询所有普通用户-->
+    <select id="loadOrdinaryUser" resultType="User">
+        select * from t_user where user_vip=0 and user_status=0
+    </select>
+
+    <!--查询所有企业用户-->
+    <select id="loadEnterpriseUser" resultType="User">
+        select * from t_user where user_vip=1 and user_status=0
+    </select>
+
+    <!--查询黑名单-->
+    <select id="loadBlacklist" resultType="User">
+        select * from t_user where user_status=1
+    </select>
+
+    <!--某个用户的信息 按照ID查找-->
+    <select id="doloadUserById" resultType="User">
+        select * from t_user where id=#{id}
+    </select>
+
+    <update id="addBlackListById" parameterType="User">
+        update t_user set user_status=1 where id=#{id}
+    </update>
+
+    <update id="renewuser" parameterType="User">
+        update t_user set user_status=0 where id=#{id}
+    </update>
+
+    <!--某个用户ID查找账户-->
+    <select id="doloadAccountById" resultType="Account">
+        select * from t_account where id=#{id}
+    </select>
+
+    <!--申请借款-->
+    <insert id="addApplyForLoan" parameterType="LoanMark">
+        insert into  t_loan_mark  set borrow_name=#{borrowName},borrow_user_id=#{borrowUserId},borrow_money=#{borrowMoney},year_rate=#{yearRate},return_monthes=#{returnMonthes},borrow_use=#{borrowUse},payment_method=#{paymentMethod},borrow_days=#{borrowDays},access_money=#{accessMoney},publish_time=#{publishTime},status=#{status},return_money_type=#{returnMoneyType},Interest_amont=#{interestAmont}
+    </insert>
+
+    <!-- 查询未审核的借款标-->
+    <select id="getLoanMark" resultType="LoanMark">
+        select * from t_loan_mark where status=0
+    </select>
+
+    <!-- 查询正在招标中-->
+    <select id="getbidding" resultType="LoanMark">
+        select * from t_loan_mark where status=1
+    </select>
+
+    <!-- 借款标审核通过-->
+    <update id="loanpass" parameterType="LoanMark">
+        update t_loan_mark set status=1 where borrow_sign_id=#{id}
+    </update>
+
+</mapper>

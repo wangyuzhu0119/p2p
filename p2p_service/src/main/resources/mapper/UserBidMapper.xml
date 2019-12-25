@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bw.mapper.UserBidMapper">
+
+    <!-- 查询出借人用户的账户-->
+    <select id="userAccount" resultType="Account">
+        select * from t_account where id=#{id}
+    </select>
+
+    <!-- 修改出借人的账户 -->
+    <update id="updateaccount" parameterType="Account">
+        update t_account set accoubt_avbalance=#{newaccoubtavbalance},accoubt_frobalance=#{newaccoubtfrobalance} where id=#{userAccountId}
+    </update>
+
+    <!-- 账户记录表增加一条信息 -->
+    <insert id="insertAccountFlow" parameterType="AccountFlow">
+        insert into t_account_flow set record_date=#{recordDate},record_handletype=#{recordHandletype},record_handlemoney=#{recordHandlemoney},account_id=#{accountId},record_notes=#{recordNotes}
+    </insert>
+
+    <!-- 投标记录表 t_bid 对这次操作进行记录 -->
+    <insert id="insertBidRecord" parameterType="BidRecord">
+        insert into t_bid_record set borrow_id=#{borrowid},borrow_name=#{borrowname},bid_money=#{bidmoney},year_rate=#{yearrate},bid_time=#{bidtime},bid_user_id=#{biduserId},borrow_user_id=#{borrowuserid}
+    </insert>
+
+    <!-- //对借款标表 t_loan_mark 进行修改 修改募集到的资金 -->
+    <update id="updateLoanMark" parameterType="LoanMark">
+        update t_loan_mark set  access_money = #{addaccessMoney} where borrow_sign_id=#{borrowid}
+    </update>
+
+    <!-- 修改status为满标审核状态 -->
+    <update id="updateStatus" parameterType="LoanMark">
+        update t_loan_mark set status=2 where borrow_sign_id=#{borrowid}
+    </update>
+
+    <!--判断是否满标 满标的话  修改status=2-->
+    <select id="getnewLoanMark" resultType="LoanMark">
+        select * from t_loan_mark where borrow_sign_id=#{borrowid}
+    </select>
+
+    <!-- 借款标详情 -->
+    <select id="doloadBid" resultType="LoanMark">
+        select * from t_loan_mark where borrow_sign_id=#{id}
+    </select>
+
+    <!-- 查询投资人的账户-->
+    <select id="getAccountById" resultType="Account">
+        select * from t_account where id=#{id}
+    </select>
+
+    <select id="getByUsername" resultType="User">
+        select * from t_user where user_username=#{username}
+    </select>
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bw.mapper.RechargeMapper">
+
+    <!-- 线上充值 未审核 -->
+    <insert id="onlineRecharge" parameterType="RechargeRecord">
+        insert into t_recharge_record set pay_money=#{payMoney},down_order_time=#{downOrderTime},charge_type=1,trade_code=#{tradeCode},pay_comment=#{payComment},pay_status=0,create_user_id=#{createUserId},audit_statue=0
+    </insert>
+
+    <!-- 查询线上充值未审核的信息 -->
+    <select id="doloadRechargeList" resultType="RechargeRecord">
+        select * from t_recharge_record where audit_statue=0 and charge_type=1
+    </select>
+
+    <!-- 查询交易密码 -->
+    <select id="getAccountbyId" resultType="Account">
+        select * from t_account where id=#{userid}
+    </select>
+
+    <!-- 获取当前审核充值信息的记录 -->
+    <select id="loadRechargeByPayId" resultType="RechargeRecord">
+        select * from t_recharge_record where pay_id=#{payId}
+    </select>
+
+    <!-- 审核结果 -->
+    <update id="updateRechargeResult" parameterType="RechargeRecord">
+        update t_recharge_record set audit_user_id=#{auditUserId},audit_statue=#{auditStatue},audit_comment=#{auditComment},audit_time=#{auditTime},pay_time=#{auditTime},pay_status=1 where pay_id=#{payId}
+    </update>
+
+    <!-- 获取充值人的可用余额 -->
+    <select id="getAccountBypayId" resultType="Account">
+        select * from t_account where id=#{id}
+    </select>
+
+    <!-- 若充值通过,充值用户的可用余额增加 -->
+    <update id="addAccoubtAvbalanceBypayId" parameterType="Account">
+        update t_account set accoubt_avbalance=#{newAc} where id=#{id}
+    </update>
+
+    <!-- 线下充值 -->
+    <insert id="offlineRecharge" parameterType="RechargeRecord">
+        insert into t_recharge_record set pay_money=#{payMoney},down_order_time=#{downOrderTime},charge_type=0,trade_code=#{tradeCode},pay_comment=#{payComment},audit_statue=0,create_user_id=#{createUserId},pay_status=0
+    </insert>
+
+    <!-- 线下充值未审核的信息 -->
+    <select id="dolaodOffRechaargeList" resultType="RechargeRecord">
+        select * from t_recharge_record where charge_type=0 and audit_statue=0
+    </select>
+
+    <!-- 线下充值未审核的信息 - 流水单号对账 -->
+    <select id="checkOffRechargeNumber" resultType="RechargeRecord">
+        select * from t_recharge_record where pay_id=#{id}
+    </select>
+    
+    <!-- 线下充值审核 -->
+    <update id="updateOffRecharge" parameterType="RechargeRecord">
+        update t_recharge_record set pay_time=#{newAuditTime},audit_time=#{newAuditTime},pay_status=1,audit_statue=#{auditStatue},audit_comment=#{auditComment} where pay_id=#{id}
+    </update>
+
+    <!-- 线下充值 修改可用金额 -->
+    <update id="updateAVByUserId" parameterType="Account">
+        update t_account set accoubt_avbalance=#{newOffAv} where id=#{userid}
+    </update>
+</mapper>
